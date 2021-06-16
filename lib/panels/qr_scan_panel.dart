@@ -102,7 +102,7 @@ class _QRScannerPanelState extends State<QRScannerPanel>
   Future _scanQRCode() async {
     await Permission.camera.request();
     String qrContent = await Scanner.scan() as String;
-    if (qrContent == null) Get.off(AdminPanel());
+    if (qrContent != null) Get.off(AdminPanel());
   }
 
   Widget getCorners() {
