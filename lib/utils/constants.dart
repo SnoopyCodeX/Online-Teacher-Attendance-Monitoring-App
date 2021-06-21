@@ -5,4 +5,5 @@ final Color secondaryColor = Color(0xff232c51);
 
 final Color logoGreen = Color(0xff25bcbb);
 
-const String BASE_URL = '';
+const String UPLOAD_BASE_URL =
+    'gs://attendance-monitoring-ap-c02d7.appspot.com';

@@ -45,3 +45,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 Online-Teachers-Attendance-Monitoring-App/
+android/app/google-services.json
