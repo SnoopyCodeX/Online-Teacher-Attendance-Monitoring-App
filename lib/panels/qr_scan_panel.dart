@@ -3,16 +3,17 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:dbcrypt/dbcrypt.dart';
 import 'package:flutter/material.dart';
-import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/models/staff.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/panels/admin_panel.dart';
+import 'package:online_teacher_staff_attendance_monitoring_app/panels/subpanel_teacher/home_panel.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/services/firestore_service.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/utils/constants.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_cache/flutter_cache.dart' as Cache;
 import 'package:qrscan/qrscan.dart' as Scanner;
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class AdminQRScannerPanel extends StatefulWidget {
   @override
@@ -46,96 +47,114 @@ class _AdminQRScannerPanelState extends State<AdminQRScannerPanel>
         elevation: 0,
       ),
       backgroundColor: primaryColor,
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Container(
-          alignment: Alignment.topCenter,
-          margin: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Login as Admin',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.openSans(
-                    color: Colors.white,
-                    fontSize: 28,
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  'Properly align the box with your qr code and make sure to focus your camera.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.openSans(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-                SizedBox(
-                  height: 100,
-                ),
-                TextFormField(
-                  controller: _loginController,
-                  decoration: InputDecoration(
-                    suffixIcon: Icon(
-                      Icons.email_outlined,
-                      color: Colors.black54,
+      body: SingleChildScrollView(
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Container(
+            alignment: Alignment.topCenter,
+            margin: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Login as Admin',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.openSans(
+                      color: Colors.white,
+                      fontSize: 28,
                     ),
-                    border: new OutlineInputBorder(
-                      borderRadius: const BorderRadius.all(
-                        const Radius.circular(10.0),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'Properly align the box with your qr code and make sure to focus your camera.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.openSans(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 100,
+                  ),
+                  TextField(
+                    controller: _loginController,
+                    style: GoogleFonts.poppins(color: Colors.white),
+                    cursorColor: Colors.white,
+                    decoration: InputDecoration(
+                      suffixIcon: Icon(
+                        Icons.email_outlined,
+                        color: Colors.white,
                       ),
+                      enabledBorder: new OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          const Radius.circular(8.0),
+                        ),
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                      ),
+                      focusedBorder: new OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          const Radius.circular(8.0),
+                        ),
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                      ),
+                      hintStyle: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                      hintText: "Type email address",
                     ),
-                    filled: true,
-                    hintStyle: new TextStyle(color: Colors.black54),
-                    hintText: "Type email address",
-                    fillColor: Colors.white,
                   ),
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                Text(
-                  'TAP HERE TO SCAN',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.aBeeZee(
-                    color: Colors.white,
-                    fontSize: 18,
+                  SizedBox(
+                    height: 30,
                   ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
+                  Text(
+                    'TAP HERE TO SCAN',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.aBeeZee(
+                      color: Colors.white,
+                      fontSize: 18,
                     ),
-                    child: Center(
-                      child: MaterialButton(
-                        onPressed: () => _scanQRCode(),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: <Widget>[
-                            getCorners(),
-                            Image.asset(
-                              'images/qrcode.png',
-                              width: 140.0,
-                              color: Colors.white,
-                            ),
-                          ],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      child: Center(
+                        child: MaterialButton(
+                          onPressed: () async => await _scanQRCode(),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
+                              getCorners(),
+                              Image.asset(
+                                'images/qrcode.png',
+                                width: 140.0,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         ),
@@ -144,10 +163,12 @@ class _AdminQRScannerPanelState extends State<AdminQRScannerPanel>
   }
 
   Future _scanQRCode() async {
+    print("Scan QR Code button");
+    await Permission.storage.request();
     await Permission.camera.request();
     String qrContent = await Scanner.scan();
 
-    if (qrContent != null || qrContent.isNotEmpty) {
+    if (qrContent.isNotEmpty) {
       String email = _loginController!.text;
 
       if (!email.isEmail || email.isEmpty) {
@@ -162,19 +183,16 @@ class _AdminQRScannerPanelState extends State<AdminQRScannerPanel>
         return;
       }
 
-      List<Staff> data = await showDialog(
-        context: context,
-        builder: (context) => FutureProgressDialog(
-          FirestoreService().getStaff('email_address', email),
-          message: Text("Verifying login..."),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(
-              Radius.circular(10),
-            ),
-          ),
-        ),
+      ProgressDialog pd = ProgressDialog(context: context);
+      pd.show(
+        max: 100,
+        msg: 'Verifying login...',
+        progressType: ProgressType.valuable,
       );
+      List<Staff> data =
+          await FirestoreService().getStaff('email_address', email);
+      pd.close();
+
       if (data.length == 1) {
         if (data[0].systemRole != 1) {
           Get.snackbar(
@@ -190,23 +208,15 @@ class _AdminQRScannerPanelState extends State<AdminQRScannerPanel>
 
         if (DBCrypt().checkpw(qrContent, data[0].qrCode)) {
           Map<String, dynamic> json = data[0].toMap();
-          json['is_active'] = true;
 
-          await showDialog(
-            context: context,
-            builder: (context) => FutureProgressDialog(
-              FirestoreService().setStaff(Staff.fromJson(json)),
-              message: Text("Logging in..."),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
-                ),
-              ),
-            ),
+          pd.show(
+            max: 100,
+            msg: 'Logging in...',
+            progressType: ProgressType.valuable,
           );
 
           await Cache.write('data', json);
+          pd.close();
           Get.offAll(() => AdminPanel(admin: data[0]));
         } else
           Get.snackbar(
@@ -332,94 +342,115 @@ class _TeacherQRScannerPanelState extends State<TeacherQRScannerPanel>
         elevation: 0,
       ),
       backgroundColor: primaryColor,
-      body: Container(
-        alignment: Alignment.topCenter,
-        margin: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Scan QR Code to Log In.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.openSans(
-                  color: Colors.white,
-                  fontSize: 28,
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Text(
-                'Properly align the box with your qr code and make sure to focus your camera.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.openSans(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-              SizedBox(
-                height: 100,
-              ),
-              TextFormField(
-                controller: _loginController,
-                decoration: InputDecoration(
-                  suffixIcon: Icon(
-                    Icons.email_outlined,
-                    color: Colors.black54,
-                  ),
-                  border: new OutlineInputBorder(
-                    borderRadius: const BorderRadius.all(
-                      const Radius.circular(10.0),
+      body: SingleChildScrollView(
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Container(
+            alignment: Alignment.topCenter,
+            margin: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Login as Teacher',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.openSans(
+                      color: Colors.white,
+                      fontSize: 28,
                     ),
                   ),
-                  filled: true,
-                  hintStyle: new TextStyle(color: Colors.black54),
-                  hintText: "Type email address",
-                  fillColor: Colors.white,
-                ),
-              ),
-              SizedBox(
-                height: 30,
-              ),
-              Text(
-                'TAP HERE TO SCAN',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.aBeeZee(
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 10,
+                  SizedBox(
+                    height: 20,
                   ),
-                  child: Center(
-                    child: MaterialButton(
-                      onPressed: () => _scanQRCode(),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: <Widget>[
-                          getCorners(),
-                          Image.asset(
-                            'images/qrcode.png',
-                            width: 140.0,
-                            color: Colors.white,
+                  Text(
+                    'Properly align the box with your qr code and make sure to focus your camera.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.openSans(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 100,
+                  ),
+                  TextField(
+                    controller: _loginController,
+                    style: GoogleFonts.poppins(color: Colors.white),
+                    cursorColor: Colors.white,
+                    decoration: InputDecoration(
+                      suffixIcon: Icon(
+                        Icons.email_outlined,
+                        color: Colors.white,
+                      ),
+                      enabledBorder: new OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          const Radius.circular(8.0),
+                        ),
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                      ),
+                      focusedBorder: new OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          const Radius.circular(8.0),
+                        ),
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                      ),
+                      hintStyle: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                      hintText: "Type email address",
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Text(
+                    'TAP HERE TO SCAN',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.aBeeZee(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      child: Center(
+                        child: MaterialButton(
+                          onPressed: () => _scanQRCode(),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
+                              getCorners(),
+                              Image.asset(
+                                'images/qrcode.png',
+                                width: 140.0,
+                                color: Colors.white,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              )
-            ],
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -427,10 +458,11 @@ class _TeacherQRScannerPanelState extends State<TeacherQRScannerPanel>
   }
 
   Future _scanQRCode() async {
+    await Permission.storage.request();
     await Permission.camera.request();
     String qrContent = await Scanner.scan();
 
-    if (qrContent != null || qrContent.isNotEmpty) {
+    if (qrContent.isNotEmpty) {
       String email = _loginController!.text;
 
       if (!email.isEmail || email.isEmpty) {
@@ -445,42 +477,25 @@ class _TeacherQRScannerPanelState extends State<TeacherQRScannerPanel>
         return;
       }
 
-      List<Staff> data = await showDialog(
-        context: context,
-        builder: (context) => FutureProgressDialog(
-          FirestoreService().getStaff('email_address', email),
-          message: Text("Verifying login..."),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(
-              Radius.circular(10),
-            ),
-          ),
-        ),
+      ProgressDialog pd = ProgressDialog(context: context);
+      pd.show(
+        max: 100,
+        msg: 'Verifying login...',
+        progressType: ProgressType.valuable,
       );
+      List<Staff> data =
+          await FirestoreService().getStaff('email_address', email);
+      pd.close();
 
-      Navigator.of(context).pop(false);
       if (data.length == 1) {
         if (DBCrypt().checkpw(qrContent, data[0].qrCode)) {
           Map<String, dynamic> json = data[0].toMap();
-          json['is_active'] = true;
 
-          await showDialog(
-            context: context,
-            builder: (context) => FutureProgressDialog(
-              FirestoreService().setStaff(Staff.fromJson(json)),
-              message: Text("Logging in..."),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
-                ),
-              ),
-            ),
-          );
-
+          json['logged_as'] = 0;
           await Cache.write('data', json);
-          Get.offAll(() => AdminPanel(admin: data[0]));
+
+          pd.close();
+          Get.offAll(() => TeacherHomePanel(teacher: data[0]));
         } else
           Get.snackbar(
             'Login Failed',

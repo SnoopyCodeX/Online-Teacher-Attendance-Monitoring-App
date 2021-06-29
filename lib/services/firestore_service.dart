@@ -117,7 +117,7 @@ class FirestoreService {
 
   Future<void> setStaff(Staff staff) async {
     Map<String, dynamic> json = staff.toMap();
-    int length = (await getStaff('email_address', json['id'])).length;
+    int length = (await getStaff('id', json['id'])).length;
 
     if (length <= 0)
       json['qrcode'] = (DBCrypt().hashpw(json['id'], DBCrypt().gensalt()));
@@ -138,9 +138,24 @@ class FirestoreService {
         snapshot.docs.map((doc) => Absent.fromJson(doc.data())).toList());
   }
 
-  Future<List<Absent>> getAbsent(String key, String value) {
+  Future<List<Absent>> getAbsentsFuture() {
+    return _db.collection('absences').get().then((snapshot) =>
+        snapshot.docs.map((doc) => Absent.fromJson(doc.data())).toList());
+  }
+
+  Future<List<Absent>> getAbsent(String key, dynamic value) {
     return (_db.collection('absences').where(key, isEqualTo: value).get().then(
         (snapshot) =>
+            snapshot.docs.map((doc) => Absent.fromJson(doc.data())).toList()));
+  }
+
+  Future<List<Absent>> getAbsentByTimestamp(String key, dynamic value) {
+    return (_db
+        .collection('absences')
+        .where(key, isGreaterThanOrEqualTo: value)
+        .where(key, isLessThanOrEqualTo: value)
+        .get()
+        .then((snapshot) =>
             snapshot.docs.map((doc) => Absent.fromJson(doc.data())).toList()));
   }
 
@@ -159,7 +174,12 @@ class FirestoreService {
         snapshot.docs.map((doc) => Late.fromJson(doc.data())).toList());
   }
 
-  Future<List<Late>> getLate(String key, String value) {
+  Future<List<Late>> getLatesFuture() {
+    return _db.collection('lates').get().then((snapshot) =>
+        snapshot.docs.map((doc) => Late.fromJson(doc.data())).toList());
+  }
+
+  Future<List<Late>> getLate(String key, dynamic value) {
     return (_db.collection('lates').where(key, isEqualTo: value).get().then(
         (snapshot) =>
             snapshot.docs.map((doc) => Late.fromJson(doc.data())).toList()));

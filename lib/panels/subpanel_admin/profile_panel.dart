@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
@@ -12,6 +11,7 @@ import 'package:online_teacher_staff_attendance_monitoring_app/services/firestor
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_cache/flutter_cache.dart' as Cache;
 import 'package:qrscan/qrscan.dart' as QRScanner;
+import 'package:sn_progress_dialog/progress_dialog.dart';
 
 class AdminProfilePanel extends StatefulWidget {
   final Staff admin;
@@ -222,6 +222,24 @@ class _AdminProfilePanelState extends State<AdminProfilePanel>
   }
 
   Future _saveProfile() async {
+    if (_firstName!.text.isEmpty ||
+        _lastName!.text.isEmpty ||
+        _email!.text.isEmpty ||
+        !_email!.text.isEmail ||
+        _address!.text.isEmpty ||
+        _number!.text.isEmpty ||
+        !_number!.text.isPhoneNumber) {
+      Get.snackbar(
+        'Save Failed',
+        'Please properly fill up all the required fields!',
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackStyle: SnackStyle.FLOATING,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     Map<String, dynamic> json = this.admin.toMap();
     if (changedPhoto)
       json['profile_url'] = await _uploadImage(Staff.fromJson(json));
@@ -235,19 +253,26 @@ class _AdminProfilePanelState extends State<AdminProfilePanel>
 
     Staff _staff = Staff.fromJson(json);
 
-    await showDialog(
-      context: context,
-      builder: (context) => FutureProgressDialog(
-        FirestoreService().setStaff(_staff),
-        message: Text("Saving profile..."),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          ),
-        ),
-      ),
-    );
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(
+        max: 100,
+        msg: 'Saving profile...',
+        progressType: ProgressType.valuable);
+    await FirestoreService().setStaff(_staff);
+    pd.close();
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => FutureProgressDialog(
+    //     FirestoreService().setStaff(_staff),
+    //     message: Text("Saving profile..."),
+    //     decoration: BoxDecoration(
+    //       color: Colors.white,
+    //       borderRadius: BorderRadius.all(
+    //         Radius.circular(10),
+    //       ),
+    //     ),
+    //   ),
+    // );
 
     Get.snackbar(
       'Save Success',
@@ -258,8 +283,7 @@ class _AdminProfilePanelState extends State<AdminProfilePanel>
       snackPosition: SnackPosition.BOTTOM,
     );
 
-    Cache.write('data', json);
-    Navigator.of(context).pop(true);
+    await Cache.write('data', json);
   }
 
   Future _pickProfileImage() async {
@@ -341,19 +365,26 @@ class _AdminProfilePanelState extends State<AdminProfilePanel>
     );
     Staff _staff = Staff.fromJson(json);
 
-    await showDialog(
-      context: context,
-      builder: (context) => FutureProgressDialog(
-        FirestoreService().setStaff(_staff),
-        message: Text("Uploading profile..."),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          ),
-        ),
-      ),
-    );
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(
+        max: 100,
+        msg: 'Saving profile...',
+        progressType: ProgressType.valuable);
+    await FirestoreService().setStaff(_staff);
+    pd.close();
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => FutureProgressDialog(
+    //     FirestoreService().setStaff(_staff),
+    //     message: Text("Uploading profile..."),
+    //     decoration: BoxDecoration(
+    //       color: Colors.white,
+    //       borderRadius: BorderRadius.all(
+    //         Radius.circular(10),
+    //       ),
+    //     ),
+    //   ),
+    // );
 
     Get.snackbar(
       'Save Success',
@@ -369,18 +400,26 @@ class _AdminProfilePanelState extends State<AdminProfilePanel>
 
   Future _saveQRCode() async {
     await Permission.storage.request();
-    Uint8List data = await showDialog(
-      context: context,
-      builder: (context) => FutureProgressDialog(
-        _generateQRCode(),
-        message: Text("Generating qrcode..."),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          ),
-        ),
-      ),
-    );
+
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(
+        max: 100,
+        msg: 'Saving profile...',
+        progressType: ProgressType.valuable);
+    Uint8List data = await _generateQRCode();
+    pd.close();
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => FutureProgressDialog(
+    //     _generateQRCode(),
+    //     message: Text("Generating qrcode..."),
+    //     decoration: BoxDecoration(
+    //       borderRadius: BorderRadius.all(
+    //         Radius.circular(10),
+    //       ),
+    //     ),
+    //   ),
+    // );
 
     var success = await ImageGallerySaver.saveImage(
       data,

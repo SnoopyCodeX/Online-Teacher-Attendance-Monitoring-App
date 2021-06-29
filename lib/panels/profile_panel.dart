@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
@@ -11,21 +10,24 @@ import 'package:online_teacher_staff_attendance_monitoring_app/models/staff.dart
 import 'package:online_teacher_staff_attendance_monitoring_app/services/firestore_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qrscan/qrscan.dart' as QRScanner;
+import 'package:sn_progress_dialog/progress_dialog.dart';
 import 'package:uuid/uuid.dart';
 
 class ProfilePanel extends StatefulWidget {
   final Staff staff;
   final bool edit;
+  final bool teacher;
 
-  ProfilePanel({required this.staff, required this.edit});
+  ProfilePanel({required this.staff, required this.edit, this.teacher = false});
 
   @override
   _ProfilePanelState createState() =>
-      _ProfilePanelState(staff: staff, edit: edit);
+      _ProfilePanelState(staff: staff, edit: edit, teacher: teacher);
 }
 
 class _ProfilePanelState extends State<ProfilePanel>
     with SingleTickerProviderStateMixin {
+  ProgressDialog? pd;
   TextEditingController? _firstName,
       _middleName,
       _lastName,
@@ -38,13 +40,16 @@ class _ProfilePanelState extends State<ProfilePanel>
 
   final Staff staff;
   final bool edit;
+  final bool teacher;
 
-  _ProfilePanelState({required this.staff, required this.edit});
+  _ProfilePanelState(
+      {required this.staff, required this.edit, this.teacher = false});
 
   @override
   void initState() {
     super.initState();
 
+    this.pd = ProgressDialog(context: context);
     this._firstName = new TextEditingController(text: staff.firstName);
     this._middleName = new TextEditingController(text: staff.middleName);
     this._lastName = new TextEditingController(text: staff.lastName);
@@ -68,17 +73,19 @@ class _ProfilePanelState extends State<ProfilePanel>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          icon: Icon(
-            Icons.arrow_back_ios_new_outlined,
-            color: Colors.black87,
-          ),
-        ),
-      ),
+      appBar: !this.teacher
+          ? AppBar(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              elevation: 0,
+              leading: IconButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                icon: Icon(
+                  Icons.arrow_back_ios_new_outlined,
+                  color: Colors.black87,
+                ),
+              ),
+            )
+          : null,
       body: Container(
         padding: EdgeInsets.only(
           left: 16,
@@ -236,6 +243,24 @@ class _ProfilePanelState extends State<ProfilePanel>
   }
 
   Future _saveProfile() async {
+    if (_firstName!.text.isEmpty ||
+        _lastName!.text.isEmpty ||
+        _email!.text.isEmpty ||
+        !_email!.text.isEmail ||
+        _address!.text.isEmpty ||
+        _number!.text.isEmpty ||
+        !_number!.text.isPhoneNumber) {
+      Get.snackbar(
+        'Save Failed',
+        'Please properly fill up all the required fields!',
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackStyle: SnackStyle.FLOATING,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     Map<String, dynamic> json = this.staff.toMap();
     if (changedPhoto)
       json['profile_url'] = await _uploadImage(Staff.fromJson(json));
@@ -249,19 +274,26 @@ class _ProfilePanelState extends State<ProfilePanel>
 
     Staff _staff = Staff.fromJson(json);
 
-    await showDialog(
-      context: context,
-      builder: (context) => FutureProgressDialog(
-        FirestoreService().setStaff(_staff),
-        message: Text("Saving profile..."),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          ),
-        ),
-      ),
+    pd!.show(
+      max: 100,
+      msg: 'Saving profile...',
+      progressType: ProgressType.valuable,
     );
+    await FirestoreService().setStaff(_staff);
+    pd!.close();
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => FutureProgressDialog(
+    //     FirestoreService().setStaff(_staff),
+    //     message: Text("Saving profile..."),
+    //     decoration: BoxDecoration(
+    //       color: Colors.white,
+    //       borderRadius: BorderRadius.all(
+    //         Radius.circular(10),
+    //       ),
+    //     ),
+    //   ),
+    // );
 
     Get.snackbar(
       'Save Success',
@@ -276,6 +308,24 @@ class _ProfilePanelState extends State<ProfilePanel>
   }
 
   Future _addProfile() async {
+    if (_firstName!.text.isEmpty ||
+        _lastName!.text.isEmpty ||
+        _email!.text.isEmpty ||
+        !_email!.text.isEmail ||
+        _address!.text.isEmpty ||
+        _number!.text.isEmpty ||
+        !_number!.text.isPhoneNumber) {
+      Get.snackbar(
+        'Save Failed',
+        'Please properly fill up all the required fields!',
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackStyle: SnackStyle.FLOATING,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     List<Staff> data =
         await FirestoreService().getStaff('email_address', _email!.text);
     Staff staff = Staff(
@@ -307,19 +357,13 @@ class _ProfilePanelState extends State<ProfilePanel>
       return;
     }
 
-    await showDialog(
-      context: context,
-      builder: (context) => FutureProgressDialog(
-        FirestoreService().setStaff(staff),
-        message: Text("Creating profile..."),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          ),
-        ),
-      ),
+    pd!.show(
+      max: 100,
+      msg: 'Creating profile...',
+      progressType: ProgressType.valuable,
     );
+    await FirestoreService().setStaff(staff);
+    pd!.close();
 
     Get.snackbar(
       'Save Success',
@@ -332,7 +376,7 @@ class _ProfilePanelState extends State<ProfilePanel>
 
     await _uploadImage(staff);
 
-    Navigator.of(context).pop(true);
+    Get.back(closeOverlays: true);
   }
 
   Future _pickProfileImage() async {
@@ -414,19 +458,13 @@ class _ProfilePanelState extends State<ProfilePanel>
     );
     Staff _staff = Staff.fromJson(json);
 
-    await showDialog(
-      context: context,
-      builder: (context) => FutureProgressDialog(
-        FirestoreService().setStaff(_staff),
-        message: Text("Uploading profile..."),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          ),
-        ),
-      ),
+    pd!.show(
+      max: 100,
+      msg: 'Uploading profile...',
+      progressType: ProgressType.valuable,
     );
+    await FirestoreService().setStaff(_staff);
+    pd!.close();
 
     Get.snackbar(
       'Save Success',
@@ -442,18 +480,14 @@ class _ProfilePanelState extends State<ProfilePanel>
 
   Future _saveQRCode() async {
     await Permission.storage.request();
-    Uint8List data = await showDialog(
-      context: context,
-      builder: (context) => FutureProgressDialog(
-        _generateQRCode(),
-        message: Text("Generating qrcode..."),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          ),
-        ),
-      ),
+
+    pd!.show(
+      max: 100,
+      msg: 'Generating qrcode...',
+      progressType: ProgressType.valuable,
     );
+    Uint8List data = await _generateQRCode();
+    pd!.close();
 
     var success = await ImageGallerySaver.saveImage(
       data,

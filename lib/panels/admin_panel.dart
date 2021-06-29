@@ -3,19 +3,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_cache/flutter_cache.dart' as Cache;
 import 'package:online_teacher_staff_attendance_monitoring_app/models/staff.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/panels/login_panel.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/panels/profile_panel.dart';
+import 'package:online_teacher_staff_attendance_monitoring_app/panels/subpanel_admin/add_admin_panel.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/panels/subpanel_admin/admins_panel.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/panels/subpanel_admin/attendance_panel.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/panels/subpanel_admin/dashboard_panel.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/panels/subpanel_admin/profile_panel.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/panels/subpanel_admin/staffs_panel.dart';
-import 'package:online_teacher_staff_attendance_monitoring_app/services/firestore_service.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/utils/utils.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/utils/constants.dart';
 
@@ -140,23 +139,18 @@ class _AdminPanelState extends State<AdminPanel>
           floatingActionButton:
               ((activeMenu == 1 || activeMenu == 2) && isCollapsed)
                   ? FloatingActionButton(
-                      onPressed: () => (activeMenu == 1)
-                          ? Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => ProfilePanel(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => (activeMenu == 1)
+                              ? ProfilePanel(
                                   staff: Staff.create(),
                                   edit: false,
+                                )
+                              : AddAdminPanel(
+                                  admin: admin,
                                 ),
-                              ),
-                            )
-                          : Get.snackbar(
-                              'No Ready',
-                              'This function is not yet implemented!',
-                              backgroundColor: Colors.deepOrangeAccent,
-                              colorText: Colors.white,
-                              snackStyle: SnackStyle.FLOATING,
-                              snackPosition: SnackPosition.BOTTOM,
-                            ),
+                        ),
+                      ),
                       child: Icon(
                         Icons.add_outlined,
                         color: Colors.white,
@@ -173,7 +167,7 @@ class _AdminPanelState extends State<AdminPanel>
                     padding: EdgeInsets.only(left: 8),
                     child: Container(
                       margin: EdgeInsets.only(
-                        top: 40,
+                        top: 20,
                         bottom: 20,
                       ),
                       child: Column(
@@ -475,25 +469,6 @@ class _AdminPanelState extends State<AdminPanel>
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop(false);
-
-              Map<String, dynamic> json = admin.toMap();
-              json['is_active'] = false;
-
-              Staff _admin = Staff.fromJson(json);
-
-              await showDialog(
-                context: context,
-                builder: (context) => FutureProgressDialog(
-                  FirestoreService().setStaff(_admin),
-                  message: Text("Saving profile..."),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
-                    ),
-                  ),
-                ),
-              );
 
               Cache.clear();
               Get.offAll(() => LoginPanel());

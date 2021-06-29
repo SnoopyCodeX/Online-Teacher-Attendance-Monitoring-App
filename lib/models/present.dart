@@ -1,20 +1,22 @@
-class Absent {
+class Present {
   final String id;
   final String staffId;
   final String firstName;
   final String lastName;
   final String middleName;
   final String profileUrl;
-  final String absentDate;
+  final String presentDate;
+  final String presentTime;
 
-  Absent({
+  Present({
     required this.id,
     required this.staffId,
     required this.firstName,
     required this.lastName,
     required this.middleName,
     required this.profileUrl,
-    required this.absentDate,
+    required this.presentDate,
+    required this.presentTime,
   });
 
   String get getId => id;
@@ -23,17 +25,19 @@ class Absent {
   String get getLastName => lastName;
   String get getMiddleName => middleName;
   String get getProfileUrl => profileUrl;
-  String get getAbsentDate => absentDate;
+  String get getLateDate => presentDate;
+  String get getPresentTime => presentTime;
 
-  factory Absent.fromJson(Map<String, dynamic> json) {
-    return Absent(
+  factory Present.fromJson(Map<String, dynamic> json) {
+    return Present(
       id: json['id'],
       staffId: json['staff_id'],
       firstName: json['first_name'],
       lastName: json['last_name'],
       middleName: json['middle_name'],
       profileUrl: json['profile_url'],
-      absentDate: json['absent_date'],
+      presentDate: json['present_date'],
+      presentTime: json['present_time'],
     );
   }
 
@@ -45,7 +49,8 @@ class Absent {
       'last_name': this.lastName,
       'middle_name': this.middleName,
       'profile_url': this.profileUrl,
-      'absent_date': this.absentDate
+      'present_date': this.presentDate,
+      'present_time': this.presentTime,
     };
   }
 }
