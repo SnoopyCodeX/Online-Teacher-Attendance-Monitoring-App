@@ -1,16 +1,23 @@
-# online_teacher_staff_attendance_monitoring_app
+# Online Teachers, Staff Attendance Monitoring App
+A simple attendance monitoring application made in flutter.
 
-A new Flutter project.
+## Admin Panel :lock:
+- [x] Dashboard
+- [x] Manage Staffs
+- [x] Manage Admins
+- [x] View Attendance
+- [x] Edit admin account (self)
 
-## Getting Started
+## Teacher / Staff Panel :pencil:
+- [x] Edit Profile
+- [x] Time-in
+- [x] Time-out
+- [x] Tag self as Absent
+- [x] Tag self as Late
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Future Additions :key:
+- [ ] GPS Location for Attendance verification
+- [ ] Voice Recognition (if possible) for Attendance verification
+- [ ] Create, edit and delete events
+- [ ] Push notifications
+- [ ] View recent attendance
