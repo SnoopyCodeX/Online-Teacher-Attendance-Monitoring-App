@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/models/staff.dart';
 import 'package:online_teacher_staff_attendance_monitoring_app/services/firestore_service.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -328,6 +329,7 @@ class _ProfilePanelState extends State<ProfilePanel>
 
     List<Staff> data =
         await FirestoreService().getStaff('email_address', _email!.text);
+    String _defTime = Jiffy(DateTime.now()).format('yyyy-MM-dd hh:mm a');
     Staff staff = Staff(
       firstName: _firstName!.text,
       middleName: _middleName!.text,
@@ -337,8 +339,8 @@ class _ProfilePanelState extends State<ProfilePanel>
       homeAddress: _address!.text,
       id: Uuid().v4(),
       qrCode: '',
-      lastIn: '',
-      lastOut: '',
+      lastIn: _defTime,
+      lastOut: _defTime,
       profileUrl: '',
       isActive: false,
       systemRole: 0,
